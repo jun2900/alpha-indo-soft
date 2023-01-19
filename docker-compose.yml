@@ -1,0 +1,68 @@
+version: '3'
+services:
+  web-create-article:
+    build: 
+      context: .
+      dockerfile: ./create-article-service/dockerfile
+    ports:
+      - "7122:7122"
+    restart: always
+    depends_on:
+      - db
+      - redis
+    networks:
+      - application
+
+  web-get-article:
+    build: 
+      context: .
+      dockerfile: ./get-article-service/dockerfile
+    ports:
+      - "7123:7123"
+    restart: always
+    depends_on:
+      - db
+      - redis
+    networks:
+      - application
+
+  db:
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: test123
+      MYSQL_DATABASE: AIS
+      MYSQL_ROOT_HOST: localhost
+      MYSQL_USER: john
+      MYSQL_PASSWORD: test123
+    volumes:
+      - database_mysql:/var/lib/mysql
+    networks:
+      - application
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - application
+
+  k-articles:
+    image: devopsfaith/krakend
+    command: run --config /etc/krakend/k-articles.json
+    hostname: k-articles
+    restart: always
+    ports:
+      - "7120:7120"
+    volumes:
+      - ./k-articles.json:/etc/krakend/k-articles.json
+    networks:
+      - application
+
+volumes:
+  database_mysql:
+
+networks:
+  application:
+

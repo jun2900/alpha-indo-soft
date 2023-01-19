@@ -1,0 +1,28 @@
+events {
+
+}
+http {
+    map $request_method $upstream_location {
+       GET     web-get-article:7123;
+       POST    web-create-article:7122;
+    }
+
+    server {
+        location /articles {
+            proxy_pass http://$upstream_location;
+        }
+    }
+}
+
+
+reverse-proxy:
+  image: nginx
+  ports:
+    - "8080:80"
+  volumes:
+    - ./nginx.conf:/etc/nginx/nginx.conf
+  depends_on:
+    - web-create-article
+    - web-get-article
+  networks:
+    - application

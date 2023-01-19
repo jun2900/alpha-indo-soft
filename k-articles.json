@@ -1,0 +1,123 @@
+{
+    "$schema": "https://www.krakend.io/schema/v3.json",
+    "version": 3,
+    "name": "Konfigurasi Gateway Service Article",
+    "timeout": "5000ms",
+    "cache_ttl": "300s",
+    "output_encoding": "json",
+    "port": 7120,
+    "sequential_start": false,
+    "extra_config": {
+      "telemetry/logging": {
+        "level": "INFO",
+        "prefix": "[KONFIGURASI Gateway]",
+        "syslog": true,
+        "stdout": true,
+        "format": "logstash"
+      },
+      "telemetry/logstash": {
+        "enabled": true
+      },
+      "security/cors": {
+        "allow_origins": [
+          "*"
+        ],
+        "expose_headers": [
+          "Content-Length"
+        ],
+        "max_age": "12h",
+        "allow_methods": [
+          "GET",
+          "HEAD",
+          "POST",
+          "PUT",
+          "DELETE"
+        ],
+        "allow_headers": [
+          "x-api-key",
+          "Authorization"
+        ]
+      }
+    },
+    "endpoints": [
+      {
+        "endpoint": "/articles",
+        "method": "POST",
+        "output_encoding": "no-op",
+        "extra_config": {
+          "qos/ratelimit/router": {
+              "max_rate": 1000,
+              "client_max_rate": 100,
+              "strategy": "ip"
+            }
+        },
+        "backend": [
+          {
+            "url_pattern": "/articles",
+            "encoding": "no-op",
+            "sd": "static",
+            "method": "POST",
+            "extra_config": {
+              "qos/circuit-breaker": {
+                "interval": 60,
+                "name": "circuit-breaker-1",
+                "timeout": 20,
+                "max_errors": 50,
+                "log_status_change": true
+              }
+            },
+            "host": [
+              "http://web-create-article:7122"
+            ],
+            "disable_host_sanitize": false
+          }
+        ],
+        "input_headers": [
+          "*"
+        ],
+        "input_query_strings": [
+          "*"
+        ]
+      },
+      {
+        "endpoint": "/articles",
+        "method": "GET",
+        "output_encoding": "no-op",
+        "extra_config": {
+          "qos/ratelimit/router": {
+              "max_rate": 1000,
+              "client_max_rate": 100,
+              "strategy": "ip"
+            }
+        },
+        "backend": [
+          {
+            "url_pattern": "/articles",
+            "encoding": "no-op",
+            "sd": "static",
+            "method": "GET",
+            "extra_config": {
+              "qos/circuit-breaker": {
+                "interval": 60,
+                "name": "circuit-breaker-1",
+                "timeout": 20,
+                "max_errors": 50,
+                "log_status_change": true
+              }
+            },
+            "host": [
+              "http://web-get-article:7123"
+            ],
+            "disable_host_sanitize": false
+          }
+        ],
+        "input_headers": [
+          "*"
+        ],
+        "input_query_strings": [
+          "*"
+        ]
+      }
+      
+    ]
+  }
