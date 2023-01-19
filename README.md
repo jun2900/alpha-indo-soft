@@ -1,5 +1,8 @@
 # alpha-indo-soft
 
+Basic example of cqrs - partial seperation.
+-. create-article-service (the command part)
+-. get-article-service (the query part)
 
 Steps to install this API on local computer:
 
